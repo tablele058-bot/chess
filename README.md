@@ -13,8 +13,8 @@ This isn't another Chess.com clone. It's a real-time PvP chess platform built fr
 
 - **No subscriptions.** Play unlimited PvP matches for free. No premium tier, no paywalled features.
 - **No ads, no tracking, no bloat.** Just chess. The board, the clock, your opponent.
-- **Distributed by design.** YugabyteDB cluster means your games are stored across multiple nodes — no single point of failure.
-- **Serverless first.** No Express server, no Socket.IO — everything runs on Next.js API routes.
+- **Distributed by design.**your games are stored across multiple nodes — no single point of failure.
+- **Serverless first**.
 - **Clean, dark UI.** No flashing banners, no distraction. Focus on the game.
 - **Your data, your rules.** Open-source and self-hostable.
 **you can play with ai and also play with your friends**
