@@ -67,6 +67,7 @@ export default function ArenaLivePage() {
   const [boardInc, setBoardInc] = useState(0);
   const [whiteDisplayMs, setWhiteDisplayMs] = useState(0);
   const [blackDisplayMs, setBlackDisplayMs] = useState(0);
+  const [promotionPending, setPromotionPending] = useState<{ from: string; to: string } | null>(null);
 
   const chessRef = useRef(new Chess());
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -252,12 +253,16 @@ export default function ArenaLivePage() {
     if (!targetSquare || sourceSquare === targetSquare || !match || gameOver || movePendingRef.current > 0) return false;
     if (myColor !== chessRef.current.turn()) return false;
 
-    const promotion = pieceType.toLowerCase() === 'p' && targetSquare[1] === (myColor === 'w' ? '8' : '1') ? 'q' : undefined;
+    const isPromotion = pieceType.toLowerCase() === 'p' && targetSquare[1] === (myColor === 'w' ? '8' : '1');
+    if (isPromotion) {
+      setPromotionPending({ from: sourceSquare, to: targetSquare });
+      return false;
+    }
 
     let localMove;
     try {
       const localGame = new Chess(chessRef.current.fen());
-      localMove = localGame.move({ from: sourceSquare, to: targetSquare, promotion });
+      localMove = localGame.move({ from: sourceSquare, to: targetSquare });
       if (!localMove) return false;
       chessRef.current = localGame;
     } catch {
@@ -267,7 +272,7 @@ export default function ArenaLivePage() {
     lastMoveRef.current = Date.now();
     setBoardInc((v) => v + 1);
 
-    submitMove(sourceSquare, targetSquare, promotion).then((result) => {
+    submitMove(sourceSquare, targetSquare).then((result) => {
       if (!result?.success) {
         chessRef.current = new Chess(match.currentFen || 'start');
         setBoardInc((v) => v + 1);
@@ -291,6 +296,51 @@ export default function ArenaLivePage() {
 
     return true;
   }, [match, myColor, gameOver, submitMove]);
+
+  const handlePromotion = useCallback(async (piece: string) => {
+    if (!promotionPending || !match) return;
+    const { from, to } = promotionPending;
+    setPromotionPending(null);
+
+    let localMove;
+    try {
+      const localGame = new Chess(chessRef.current.fen());
+      localMove = localGame.move({ from, to, promotion: piece as 'q' | 'r' | 'b' | 'n' });
+      if (!localMove) return;
+      chessRef.current = localGame;
+    } catch {
+      return;
+    }
+
+    lastMoveRef.current = Date.now();
+    setBoardInc((v) => v + 1);
+
+    submitMove(from, to, piece).then((result) => {
+      if (!result?.success) {
+        chessRef.current = new Chess(match.currentFen || 'start');
+        setBoardInc((v) => v + 1);
+      }
+      if (result?.whiteClockMs != null) {
+        setWhiteDisplayMs(result.whiteClockMs);
+        setBlackDisplayMs(result.blackClockMs);
+      }
+      if (result?.gameOver) {
+        setGameOver({ status: result.status, winnerId: result.winnerId || null });
+        if (result.whiteEloChange !== undefined) {
+          setEloChanges({
+            whiteEloChange: result.whiteEloChange,
+            blackEloChange: result.blackEloChange,
+            whiteEloAfter: result.whiteEloAfter,
+            blackEloAfter: result.blackEloAfter,
+          });
+        }
+      }
+    });
+  }, [promotionPending, match, submitMove]);
+
+  const cancelPromotion = useCallback(() => {
+    setPromotionPending(null);
+  }, []);
 
   const handleResign = async () => {
     if (sendingRef.current) return;
@@ -548,6 +598,38 @@ export default function ArenaLivePage() {
         </div>
       </div>
 
+      {promotionPending && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="bg-[#211f1c] border border-[#2d2b27] rounded-xl p-5 shadow-2xl">
+            <p className="text-xs font-bold uppercase tracking-widest text-[#bababa] text-center mb-4">Promote Pawn</p>
+            <div className="flex gap-3">
+              {(
+                [
+                  { piece: 'q', label: '♛', name: 'Queen' },
+                  { piece: 'r', label: '♜', name: 'Rook' },
+                  { piece: 'b', label: '♝', name: 'Bishop' },
+                  { piece: 'n', label: '♞', name: 'Knight' },
+                ] as const
+              ).map(({ piece, label, name }) => (
+                <button
+                  key={piece}
+                  onClick={() => handlePromotion(piece)}
+                  className="w-16 h-16 flex items-center justify-center text-3xl bg-[#262421] hover:bg-[#363431] border border-[#3c3934] hover:border-emerald-500 rounded-lg transition-all hover:scale-110 hover:shadow-lg hover:shadow-emerald-500/10"
+                  title={name}
+                >
+                  <span className="text-[#ffffff]">{label}</span>
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={cancelPromotion}
+              className="w-full mt-3 py-1.5 text-[10px] font-bold text-[#615e59] hover:text-[#bababa] uppercase tracking-wider transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
       {gameOver && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
           <div className="bg-[#211f1c] border border-[#2d2b27] rounded-xl p-8 shadow-2xl max-w-sm w-full mx-4 text-center">
