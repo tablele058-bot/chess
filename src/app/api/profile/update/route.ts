@@ -27,22 +27,28 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Username already taken' }, { status: 409 });
     }
 
-    const result = await query(
-      `INSERT INTO profiles (id, username, avatar_url)
-       VALUES ($1, $2, $3)
-       ON CONFLICT (id)
-       DO UPDATE SET
-         username = EXCLUDED.username,
-         avatar_url = COALESCE(EXCLUDED.avatar_url, profiles.avatar_url)
-       RETURNING id, username, avatar_url, elo_rating`,
-      [targetUserId, username, avatarUrl],
+    const up = await query(
+      `UPDATE profiles SET username = $1, avatar_url = COALESCE($2, avatar_url) WHERE id = $3`,
+      [username, avatarUrl, targetUserId]
     );
 
-    if (result.rows.length === 0) {
+    if (!up.rowCount || up.rowCount === 0) {
+      await query(
+        `INSERT INTO profiles (id, username, avatar_url) VALUES ($1, $2, $3)`,
+        [targetUserId, username, avatarUrl]
+      );
+    }
+
+    const sel = await query(
+      `SELECT id, username, avatar_url, elo_rating FROM profiles WHERE id = $1`,
+      [targetUserId]
+    );
+
+    if (sel.rows.length === 0) {
       return NextResponse.json({ error: 'Failed to update profile' }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true, profile: result.rows[0] });
+    return NextResponse.json({ success: true, profile: sel.rows[0] });
   } catch (err) {
     console.error('[API profile/update]', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
