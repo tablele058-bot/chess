@@ -7,7 +7,7 @@ interface ExtendedGlobal {
   __chessDbWarned?: boolean;
 }
 
-function getPool(): pg.Pool | null {
+export function getPool(): pg.Pool | null {
   const g = globalThis as ExtendedGlobal;
 
   if (g.__chessDbPool) return g.__chessDbPool;

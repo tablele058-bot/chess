@@ -1,4 +1,4 @@
-import { query } from './db';
+import { query, getPool } from './db';
 
 let migrated = false;
 
