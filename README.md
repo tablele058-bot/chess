@@ -17,6 +17,7 @@ This isn't another Chess.com clone. It's a real-time PvP chess platform built fr
 - **Serverless first.** No Express server, no Socket.IO — everything runs on Next.js API routes.
 - **Clean, dark UI.** No flashing banners, no distraction. Focus on the game.
 - **Your data, your rules.** Open-source and self-hostable.
+**you can play with ai and also play with your friends**
 
 
 ## Getting Started
