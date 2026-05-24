@@ -3,8 +3,11 @@ import { query } from './db';
 let migrated = false;
 
 async function canConnect(): Promise<boolean> {
+  const p = getPool();
+  if (!p) return false;
   try {
-    await query('SELECT 1');
+    const client = await p.connect();
+    client.release();
     return true;
   } catch {
     return false;
