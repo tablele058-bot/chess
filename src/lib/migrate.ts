@@ -19,8 +19,6 @@ export async function runMigrations(): Promise<void> {
     return;
   }
 
-  migrated = true;
-
   const statements: { name: string; sql: string }[] = [
     {
       name: 'profiles',
@@ -227,5 +225,6 @@ export async function runMigrations(): Promise<void> {
     }
   }
 
+  migrated = true;
   console.log('[Migrations] Schema migration complete');
 }
