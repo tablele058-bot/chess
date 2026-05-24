@@ -2,6 +2,11 @@
 
 **Built because we got tired of cloning Chess.com.**
 
+https://chess-arena-ten.vercel.app/ 
+
+
+use pc for better experience of ui 
+
 This isn't another Chess.com clone. It's a real-time PvP chess platform built from scratch — because cloning Chess.com is boring and the original is overrated.
 
 ## Why This Is Better Than Chess.com
