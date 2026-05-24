@@ -1,3 +1,4 @@
+import pg from 'pg';
 import { query, getPool } from './db';
 
 let migrated = false;
@@ -220,12 +221,27 @@ export async function runMigrations(): Promise<void> {
     },
   ];
 
-  for (const stmt of statements) {
-    try {
-      await query(stmt.sql);
-    } catch (err) {
-      console.warn(`[Migrations] Skipped "${stmt.name}":`, (err as Error)?.message || err);
+  const p = getPool();
+  if (!p) return;
+
+  let client: pg.PoolClient;
+  try {
+    client = await p.connect();
+  } catch {
+    console.log('[Migrations] Cannot acquire connection — skipping');
+    return;
+  }
+
+  try {
+    for (const stmt of statements) {
+      try {
+        await client.query(stmt.sql);
+      } catch (err) {
+        console.warn(`[Migrations] Skipped "${stmt.name}":`, (err as Error)?.message || err);
+      }
     }
+  } finally {
+    client.release();
   }
 
   migrated = true;
