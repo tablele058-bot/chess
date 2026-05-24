@@ -27,19 +27,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Username already taken' }, { status: 409 });
     }
 
-    await query(
+    const result = await query(
       `INSERT INTO profiles (id, username, avatar_url)
        VALUES ($1, $2, $3)
        ON CONFLICT (id)
        DO UPDATE SET
          username = EXCLUDED.username,
-         avatar_url = COALESCE(EXCLUDED.avatar_url, profiles.avatar_url)`,
+         avatar_url = COALESCE(EXCLUDED.avatar_url, profiles.avatar_url)
+       RETURNING id, username, avatar_url, elo_rating`,
       [targetUserId, username, avatarUrl],
-    );
-
-    const result = await query(
-      `SELECT id, username, avatar_url, elo_rating, created_at FROM profiles WHERE id = $1`,
-      [targetUserId]
     );
 
     if (result.rows.length === 0) {

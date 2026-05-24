@@ -160,24 +160,42 @@ function ProfilePageContent() {
       .then((r) => r.json())
       .then((data) => {
         const p = data.profile || {};
-        const games = (data.games || []).map((g: any) => ({
+        const apiGames = (data.games || []).map((g: any) => ({
           id: g.id,
           opponent: g.opponent || 'Unknown',
           result: g.result || 'Finished',
           playedAt: g.played_at || g.playedAt || new Date().toISOString(),
           isBot: !!g.is_bot,
         }));
+        const local = isOwn ? JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]') : [];
+        const localMap = new Map(local.map((g: any) => [g.id, g]));
+        const merged = apiGames.slice();
+        for (const lg of local) {
+          if (!merged.some((g: any) => g.id === lg.id)) {
+            merged.push({
+              id: lg.id,
+              opponent: lg.opponent || 'Unknown',
+              result: lg.result || 'Finished',
+              playedAt: lg.playedAt || new Date().toISOString(),
+              isBot: true,
+            });
+          }
+        }
+        merged.sort((a: any, b: any) => new Date(b.playedAt).getTime() - new Date(a.playedAt).getTime());
+        const wins = merged.filter((g: any) => g.result === 'Won').length;
+        const losses = merged.filter((g: any) => g.result === 'Lost').length;
+        const draws = merged.filter((g: any) => g.result === 'Draw').length;
         setProfile({
           id: p.id || targetUserId,
           username: p.username || (isOwn ? getDefaultName() : `user_${targetUserId.slice(-6)}`),
           email: p.email || '',
           avatar_url: p.avatar_url || null,
           elo: p.elo || 1200,
-          gamesPlayed: p.gamesPlayed || games.length,
-          isProvisional: p.isProvisional ?? (games.length <= 15),
+          gamesPlayed: p.gamesPlayed || merged.length,
+          isProvisional: p.isProvisional ?? (merged.length <= 15),
           createdAt: p.createdAt || new Date().toISOString(),
-          games,
-          stats: data.stats || { wins: 0, losses: 0, draws: 0, total: 0 },
+          games: merged,
+          stats: data.stats || { wins, losses, draws, total: merged.length },
         });
         setLoading(false);
       })
