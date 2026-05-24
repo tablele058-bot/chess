@@ -4,7 +4,8 @@
 
 https://chess-arena-ten.vercel.app/ 
 
-vodapellithrilok my chess.com id if any one want to play just send me challenge 
+vodapellithrilok — *my Chess.com id
+If anyone wants to play, just send me a challenge*. ♟️
 
 **use pc for better experience of ui** 
 
