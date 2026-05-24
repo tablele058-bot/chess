@@ -46,8 +46,7 @@ src/app/academy/      → Learning portal (tactics, openings, endgames, video le
 src/lib/              → Database singleton pool, migrations
 src/hooks/            → React hooks (useSocial, useGame)
 ```
-
-PvP matches work through REST API polling (800ms interval). No Socket.IO, no Express server. Both players see moves in real-time without page refresh.
+No Socket.IO, no Express server. Both players see moves in real-time without page refresh.
 
 ## License
 
