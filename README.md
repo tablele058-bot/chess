@@ -13,19 +13,8 @@ This isn't another Chess.com clone. It's a real-time PvP chess platform built fr
 - **Clean, dark UI.** No flashing banners, no distraction. Focus on the game.
 - **Your data, your rules.** Open-source and self-hostable.
 
-## Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| Framework | Next.js 16 (Webpack) |
-| Language | TypeScript |
-| Database | YugabyteDB (Distributed PostgreSQL) |
-| Auth | Clerk |
-| Chess Engine | chess.js, react-chessboard |
-| Styling | Tailwind CSS v4 |
 
 ## Getting Started
-
 ```bash
 # Install dependencies
 npm install
