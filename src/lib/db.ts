@@ -64,7 +64,13 @@ export async function query(
     return { rows: [], rowCount: 0, command: '', oid: 0, fields: [] };
   }
 
-  const client = await p.connect();
+  let client: pg.PoolClient;
+  try {
+    client = await p.connect();
+  } catch (err) {
+    console.error('[DB] Connect error:', (err as Error)?.message || err);
+    return { rows: [], rowCount: 0, command: '', oid: 0, fields: [] };
+  }
   try {
     const result = await client.query(text, params);
     return result;
@@ -82,7 +88,13 @@ export async function withTransaction<T>(
   const p = getPool();
   if (!p) return null;
 
-  const client = await p.connect();
+  let client: pg.PoolClient;
+  try {
+    client = await p.connect();
+  } catch (err) {
+    console.error('[DB] Transaction connect error:', (err as Error)?.message || err);
+    return null;
+  }
   try {
     await client.query('BEGIN');
     const result = await fn(client);

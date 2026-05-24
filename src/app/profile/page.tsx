@@ -157,7 +157,10 @@ function ProfilePageContent() {
     const controller = new AbortController();
 
     fetch(`/api/users/profile?userId=${encodeURIComponent(targetUserId)}`, { signal: controller.signal })
-      .then((r) => r.json())
+      .then(async (r) => {
+        if (!r.ok) throw new Error('API error');
+        return r.json();
+      })
       .then((data) => {
         const p = data.profile || {};
         const apiGames = (data.games || []).map((g: any) => ({
