@@ -129,20 +129,11 @@ function ChessAppContent() {
         fenHistory: fenHistory,
         playedAt: new Date().toISOString()
       };
-      fetch(`${SERVER_URL}/api/games/save`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(gamePayload)
-      })
-        .then((res) => res.json())
-        .then(() => console.log('Match saved to database'))
-        .catch(() => {
-          const local = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-          if (!local.some((g: any) => g.id === gamePayload.id)) {
-            local.unshift(gamePayload);
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(local));
-          }
-        });
+      const local = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      if (!local.some((g: any) => g.id === gamePayload.id)) {
+        local.unshift(gamePayload);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(local));
+      }
     }
   }, [status, moveHistory, hasSavedGame, user, turn, botElo, fenHistory, reviewGameId]);
 
@@ -156,16 +147,26 @@ function ChessAppContent() {
 
   useEffect(() => {
     if (!reviewGameId) return;
-    fetch(`${SERVER_URL}/api/games/${reviewGameId}/moves`)
-      .then((r) => r.json())
-      .then((data) => {
-        if (data && data.moves) loadGameHistory(data.moves);
-      })
-      .catch(() => {
-        const local = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-        const match = local.find((g: any) => g.id === reviewGameId);
-        if (match) loadGameHistory(match.moves);
-      });
+    async function loadReview() {
+      try {
+        const res = await fetch(`/api/matches/${reviewGameId}`);
+        const data = await res.json();
+        if (data?.match?.moveHistory?.length > 0) {
+          const sanMoves = data.match.moveHistory.map((m: any) => m.san);
+          loadGameHistory(sanMoves);
+          return;
+        }
+      } catch {}
+      try {
+        const res = await fetch(`${SERVER_URL}/api/games/${reviewGameId}/moves`);
+        const data = await res.json();
+        if (data && data.moves) { loadGameHistory(data.moves); return; }
+      } catch {}
+      const local = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      const match = local.find((g: any) => g.id === reviewGameId);
+      if (match) loadGameHistory(match.moves);
+    }
+    loadReview();
   }, [reviewGameId, loadGameHistory]);
 
   useEffect(() => {
