@@ -1,0 +1,16 @@
+[ChessServer] Starting...
+[ChessServer] CORS origin: http://localhost:3000
+[ChessServer] Stockfish path: null
+[ChessServer] Bot workers: 2
+[ChessServer] NNUE: default
+[DB] Pool created (host=us-east-1.4bfc4af3-316a-4534-8e4a-c02ea4c8791c.aws.yugabyte.cloud port=5433 db=postgres max=20)
+[DB] Connection verified — PostgreSQL 15.12-YB-2025.2.3.0-b0 on aarch64-unknown-linux-gnu, compiled by clang version 19.1.0 (https://github.com/yugabyte/llvm-project.git a2a6b655e14e7fa1fcf1011a6cb29cb8575249c0), 64-bit
+[ChessServer] YugabyteDB connection established
+[Cache] Using in-memory store
+[SocialDB] Schema migration complete (profiles + friendships + challenges)
+[YB] Connection pool initialized
+[YB] Schema migration complete
+[SocialDB] Seeded profiles from users table
+[ChessServer] Stockfish not found — skipping bot workers and engine pool
+[ChessServer] Listening on port 4000
+[ChessServer] WebSocket ready at ws://localhost:4000
