@@ -1,4 +1,4 @@
-# Sujana Chess Arena
+# Chess Arena
 
 **Built because we got tired of cloning Chess.com.**
 
